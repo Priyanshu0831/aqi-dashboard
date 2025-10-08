@@ -1,13 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #FAFBFC;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Global Color Palette */
+:root {
+  /* Background */
+  --bg-primary: #FAFBFC;
+  --bg-card: #FFFFFF;
+  
+  /* Text */
+  --text-primary: #111827;
+  --text-muted: #6B7280;
+  
+  /* Accent */
+  --accent-primary: #28784A;
+  --accent-muted: #E6F6EE;
+  
+  /* AQI Colors */
+  --aqi-good: #2E7D32;
+  --aqi-satisfactory: #F6C94C;
+  --aqi-moderate: #F59E0B;
+  --aqi-unhealthy: #EF4444;
+  --aqi-very-unhealthy: #8B5CF6;
+  --aqi-hazardous: #7F1D1D;
+  
+  /* Pastel Backgrounds */
+  --pastel-temp: #FFF7ED;
+  --pastel-humidity: #F0F9FF;
+  --pastel-wind: #F7FEE7;
+  --pastel-uv: #FFF7F9;
+}
+
+/* Custom utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Card Styles */
+.card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+/* Typography */
+.text-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.text-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* AQI Color Classes */
+.bg-aqi-good { background-color: var(--aqi-good); }
+.bg-aqi-satisfactory { background-color: var(--aqi-satisfactory); }
+.bg-aqi-moderate { background-color: var(--aqi-moderate); }
+.bg-aqi-unhealthy { background-color: var(--aqi-unhealthy); }
+.bg-aqi-very-unhealthy { background-color: var(--aqi-very-unhealthy); }
+.bg-aqi-hazardous { background-color: var(--aqi-hazardous); }
+
+.text-aqi-good { color: var(--aqi-good); }
+.text-aqi-satisfactory { color: var(--aqi-satisfactory); }
+.text-aqi-moderate { color: var(--aqi-moderate); }
+.text-aqi-unhealthy { color: var(--aqi-unhealthy); }
+.text-aqi-very-unhealthy { color: var(--aqi-very-unhealthy); }
+.text-aqi-hazardous { color: var(--aqi-hazardous); }
+
+/* Pastel Background Classes */
+.bg-pastel-temp { background-color: var(--pastel-temp); }
+.bg-pastel-humidity { background-color: var(--pastel-humidity); }
+.bg-pastel-wind { background-color: var(--pastel-wind); }
+.bg-pastel-uv { background-color: var(--pastel-uv); }
+
+/* Animation Classes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out;
 }
