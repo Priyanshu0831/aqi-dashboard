@@ -37,6 +37,7 @@ import {
 import ExposureRiskCalculator from './ExposureRiskCalculator';
 import LoginModal from './LoginModal';
 import RegistrationModal from './RegistrationModal';
+import LocationComparison from './LocationComparison';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers in react-leaflet
@@ -70,6 +71,8 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   // Modal handlers
   const handleLoginClick = () => {
@@ -93,6 +96,13 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
     setIsRegistrationModalOpen(false);
     // Call the original onLogin with the new user data
     onLogin(userData);
+  };
+
+  // Handle login for comparison feature
+  const handleComparisonLogin = (userData) => {
+    setUser(userData);
+    setIsLoggedIn(true);
+    setIsLoginModalOpen(false);
   };
 
   // Mock data for demonstration
@@ -1051,6 +1061,15 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
             </div>
           </div>
           </div>
+
+          {/* Location Comparison Section */}
+          <div className="mb-8">
+            <LocationComparison 
+              isLoggedIn={isLoggedIn}
+              onLogin={handleLoginClick}
+              user={user}
+            />
+          </div>
         </div>
       )}
 
@@ -1082,7 +1101,7 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
       <LoginModal 
         isOpen={isLoginModalOpen}
         onClose={handleLoginModalClose}
-        onLogin={onLogin}
+        onLogin={handleComparisonLogin}
         onShowRegistration={handleShowRegistration}
       />
       

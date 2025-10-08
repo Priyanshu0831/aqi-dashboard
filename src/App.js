@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Dashboard from './Dashboard';
 import LandingPage from './components/LandingPage';
 import IndexScreen from './components/IndexScreen';
+import LoginScreen from './components/LoginScreen';
 import LoginModal from './components/LoginModal';
 import './App.css';
 
@@ -87,7 +88,7 @@ function App() {
             isLoggedIn ? (
               <Navigate to="/dashboard" replace />
             ) : (
-              <LandingPage onLogin={handleShowLogin} onDirectLogin={handleDirectLogin} />
+              <LoginScreen onLogin={handleLogin} />
             )
           } 
         />
@@ -96,11 +97,7 @@ function App() {
         <Route 
           path="/landing" 
           element={
-            isLoggedIn ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <LandingPage onLogin={handleShowLogin} onDirectLogin={handleDirectLogin} />
-            )
+            <LandingPage onLogin={handleShowLogin} onDirectLogin={handleDirectLogin} />
           } 
         />
         
