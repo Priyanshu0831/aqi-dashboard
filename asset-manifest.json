@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/aqi-dashboard/static/css/main.2364815c.css",
-    "main.js": "/aqi-dashboard/static/js/main.beee85f1.js",
+    "main.js": "/aqi-dashboard/static/js/main.9257164d.js",
     "static/js/453.31eff9fc.chunk.js": "/aqi-dashboard/static/js/453.31eff9fc.chunk.js",
     "index.html": "/aqi-dashboard/index.html",
     "main.2364815c.css.map": "/aqi-dashboard/static/css/main.2364815c.css.map",
-    "main.beee85f1.js.map": "/aqi-dashboard/static/js/main.beee85f1.js.map",
+    "main.9257164d.js.map": "/aqi-dashboard/static/js/main.9257164d.js.map",
     "453.31eff9fc.chunk.js.map": "/aqi-dashboard/static/js/453.31eff9fc.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.2364815c.css",
-    "static/js/main.beee85f1.js"
+    "static/js/main.9257164d.js"
   ]
 }
