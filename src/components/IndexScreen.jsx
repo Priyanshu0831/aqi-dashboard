@@ -29,7 +29,7 @@ const IndexScreen = () => {
             <div className="bg-blue-600 p-3 rounded-full mr-4">
               <Shield className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900">AQI Dashboard</h1>
+            <h1 className="text-4xl font-bold text-gray-900">AQI Dashboard Index</h1>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Choose your access level to continue to the Air Quality Index monitoring system
