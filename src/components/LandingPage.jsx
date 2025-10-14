@@ -32,7 +32,11 @@ import {
   Cloud,
   Activity,
   Globe,
-  Calendar
+  Calendar,
+  User,
+  Heart,
+  ArrowLeft,
+  Zap
 } from 'lucide-react';
 import ExposureRiskCalculator from './ExposureRiskCalculator';
 import LoginModal from './LoginModal';
@@ -63,6 +67,7 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
   const [aiRecommendations, setAiRecommendations] = useState(null);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState('Muscat, Oman');
+  const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
   const [locationSearchQuery, setLocationSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -154,6 +159,45 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
       snippet: "Access 5 years of historical air quality data through our new open data portal for research and analysis.",
       date: "2024-01-12",
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop"
+    }
+  ];
+
+  const mockBlogs = [
+    {
+      id: 1,
+      title: "Understanding Air Quality Index: A Complete Guide for Health-Conscious Citizens",
+      category: "Air Quality Education",
+      readTime: "5 MIN",
+      date: "JAN 15, 2025",
+      description: "Learn how to interpret AQI values and protect your health with practical tips for different air quality conditions and seasonal variations.",
+      image: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=250&fit=crop"
+    },
+    {
+      id: 2,
+      title: "The Hidden Dangers of Indoor Air Pollution: What You Need to Know",
+      category: "Health & Safety",
+      readTime: "7 MIN",
+      date: "JAN 12, 2025",
+      description: "Discover common indoor air pollutants, their sources, and effective strategies to improve your home's air quality for better health.",
+      image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop"
+    },
+    {
+      id: 3,
+      title: "Climate Change and Air Quality: The Connection You Should Understand",
+      category: "Environmental Science",
+      readTime: "6 MIN",
+      date: "JAN 10, 2025",
+      description: "Explore how climate change affects air quality patterns and what this means for public health and environmental policy decisions.",
+      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=250&fit=crop"
+    },
+    {
+      id: 4,
+      title: "Smart City Solutions: How Technology is Revolutionizing Air Quality Monitoring",
+      category: "Technology & Innovation",
+      readTime: "4 MIN",
+      date: "JAN 8, 2025",
+      description: "Discover cutting-edge technologies and IoT solutions that are transforming how cities monitor and manage air quality in real-time.",
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop"
     }
   ];
 
@@ -957,6 +1001,59 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
           </div>
         </div>
 
+        {/* News and Articles Section */}
+        <div className="mb-12">
+          <div className="bg-gray-50/70 backdrop-blur-lg rounded-3xl shadow-lg p-8 border border-gray-200/40">
+            <h2 className="text-3xl font-bold text-gray-800 mb-8">News and Articles</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {mockBlogs.map((blog, index) => (
+                <div key={blog.id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group cursor-pointer overflow-hidden">
+                  {/* Blog Image */}
+                  <div className="relative">
+                    <img
+                      src={blog.image}
+                      alt={blog.title}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {/* Share Icon Overlay */}
+                    <div className="absolute top-3 right-3">
+                      <button className="p-2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                        <Share2 className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Blog Content */}
+                  <div className="p-4">
+                    {/* Category and Meta */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                        {blog.category}
+                      </span>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <span>{blog.readTime}</span>
+                        <span className="mx-1">•</span>
+                        <span>{blog.date}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Title */}
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
+                      {blog.title}
+                    </h3>
+                    
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                      {blog.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* AI Recommender */}
         <div className="mb-12">
           <div className="bg-purple-50/70 backdrop-blur-lg rounded-3xl shadow-lg p-8 border border-purple-200/40 hover:shadow-xl transition-all duration-300">
@@ -966,58 +1063,311 @@ const LandingPage = ({ onLogin, onDirectLogin }) => {
               <p className="text-slate-600">Personalized advice based on current conditions</p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {!showAIRecommendations ? (
+              /* Initial State - Show Location and Details */
               <div className="space-y-6">
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Guidance</h3>
-                  <p className="text-gray-700 mb-4">{aiRecommendations?.guidance}</p>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Confidence:</span>
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-purple-600 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${aiRecommendations?.confidence}%` }}
-                      />
+                {/* Current Location & Conditions */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-blue-600" />
+                    Current Location & Conditions
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Location</span>
+                        <span className="font-semibold text-gray-900">{selectedLocation || 'Muscat, Oman'}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Current AQI</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getAqiColor(aqiData?.value || 0)}`}>
+                            {aqiData?.value || 0}
+                          </span>
+                          <span className="text-sm font-semibold text-gray-900">{aqiData?.category || 'Moderate'}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Primary Pollutant</span>
+                        <span className="font-semibold text-gray-900">{aqiData?.primaryPollutant || 'PM2.5'}</span>
+                      </div>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">{aiRecommendations?.confidence}%</span>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Temperature</span>
+                        <span className="font-semibold text-gray-900">{weatherData?.temperature || 28}°C</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Humidity</span>
+                        <span className="font-semibold text-gray-900">{weatherData?.humidity || 65}%</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-600">Wind Speed</span>
+                        <span className="font-semibold text-gray-900">{weatherData?.windSpeed || 12} km/h</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Actionable Tips</h3>
-                  <ul className="space-y-3">
-                    {aiRecommendations?.tips.map((tip, index) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700">{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
+
+                {/* Health Profile Preview */}
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <User className="w-5 h-5 text-green-600" />
+                    Health Profile Assessment
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                      <Heart className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-green-800 mb-1">Health Condition</h4>
+                      <p className="text-sm text-green-700">General assessment based on AQI levels</p>
+                    </div>
+                    
+                    <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-blue-800 mb-1">Protection Level</h4>
+                      <p className="text-sm text-blue-700">Personalized safety recommendations</p>
+                    </div>
+                    
+                    <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <Activity className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-purple-800 mb-1">Activity Guidance</h4>
+                      <p className="text-sm text-purple-700">Safe outdoor activity suggestions</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-4 border border-purple-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Brain className="w-6 h-6 text-purple-600" />
+                      <h4 className="font-semibold text-purple-800">AI Analysis Ready</h4>
+                    </div>
+                    <p className="text-sm text-purple-700">
+                      Our AI will analyze your current location's air quality, weather conditions, and provide personalized health recommendations tailored to your specific situation.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Get Recommendations Button */}
+                <div className="text-center">
+                  <button
+                    onClick={() => setShowAIRecommendations(true)}
+                    className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 mx-auto"
+                  >
+                    <Brain className="w-6 h-6" />
+                    <span>Get AI Recommendations</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
-              
-              <div className="flex flex-col justify-center space-y-4">
-                <button
-                  onClick={handleLoginClick}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>Save as PDF</span>
-                </button>
-                
-                <button
-                  onClick={handleLoginClick}
-                  className="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                >
-                  <Share2 className="w-5 h-5" />
-                  <span>Share Recommendations</span>
-                </button>
-                
-                <div className="text-center text-sm text-gray-500">
-                  <p>Get personalized recommendations by logging in</p>
+            ) : (
+              /* Results State - Show Detailed Recommendations */
+              <div className="space-y-6">
+                {/* Header with Back Button */}
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setShowAIRecommendations(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Overview</span>
+                  </button>
+                  
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleLoginClick}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Save PDF</span>
+                    </button>
+                    <button
+                      onClick={handleLoginClick}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span>Share</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* AI Recommendations Results */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    {/* Risk Assessment */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-orange-600" />
+                        Risk Assessment
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200">
+                          <div>
+                            <h4 className="font-semibold text-orange-800">Current Risk Level</h4>
+                            <p className="text-sm text-orange-700">Based on AQI and weather conditions</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-orange-800">Moderate</div>
+                            <div className="text-sm text-orange-600">Score: 65/100</div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Air Quality Impact</span>
+                            <span className="text-sm font-semibold text-orange-600">Moderate</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Weather Factor</span>
+                            <span className="text-sm font-semibold text-green-600">Low</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Overall Safety</span>
+                            <span className="text-sm font-semibold text-yellow-600">Caution</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Immediate Actions */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-red-600" />
+                        Immediate Actions
+                      </h3>
+                      
+                      <ul className="space-y-3">
+                        <li className="flex items-start gap-3">
+                          <CheckCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium text-gray-900">Limit outdoor activities</span>
+                            <p className="text-sm text-gray-600">Reduce time spent outside during peak pollution hours</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <CheckCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium text-gray-900">Use air purifiers indoors</span>
+                            <p className="text-sm text-gray-600">Keep indoor air clean with HEPA filters</p>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <CheckCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium text-gray-900">Stay hydrated</span>
+                            <p className="text-sm text-gray-600">Drink plenty of water to help your body cope</p>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {/* Health Recommendations */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Heart className="w-5 h-5 text-green-600" />
+                        Health Recommendations
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                          <h4 className="font-semibold text-green-800 mb-2">For General Health</h4>
+                          <ul className="space-y-1 text-sm text-green-700">
+                            <li>• Monitor air quality before outdoor activities</li>
+                            <li>• Use N95 masks if venturing outside</li>
+                            <li>• Keep windows closed during high pollution</li>
+                            <li>• Consider indoor exercise alternatives</li>
+                          </ul>
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <h4 className="font-semibold text-blue-800 mb-2">For Respiratory Health</h4>
+                          <ul className="space-y-1 text-sm text-blue-700">
+                            <li>• Use saline nasal spray to reduce irritation</li>
+                            <li>• Avoid strenuous outdoor activities</li>
+                            <li>• Consider using air purifiers in bedrooms</li>
+                            <li>• Stay indoors during peak pollution hours</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Activity Suggestions */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-blue-600" />
+                        Safe Activity Suggestions
+                      </h3>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                          <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium text-green-800">Indoor Yoga</span>
+                            <p className="text-sm text-green-700">Low-impact exercise with air conditioning</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium text-blue-800">Shopping Malls</span>
+                            <p className="text-sm text-blue-700">Air-conditioned indoor activities</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                          <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                          <div>
+                            <span className="font-medium text-yellow-800">Outdoor Exercise</span>
+                            <p className="text-sm text-yellow-700">Not recommended - high pollution levels</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* AI Confidence */}
+                    <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-6 border border-purple-200">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Brain className="w-6 h-6 text-purple-600" />
+                        <h3 className="text-lg font-semibold text-purple-800">AI Analysis Confidence</h3>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-purple-700">Data Quality</span>
+                          <span className="text-sm font-semibold text-purple-800">95%</span>
+                        </div>
+                        <div className="w-full bg-purple-200 rounded-full h-2">
+                          <div className="bg-purple-600 h-2 rounded-full" style={{ width: '95%' }}></div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-purple-700">Recommendation Accuracy</span>
+                          <span className="text-sm font-semibold text-purple-800">87%</span>
+                        </div>
+                        <div className="w-full bg-purple-200 rounded-full h-2">
+                          <div className="bg-purple-600 h-2 rounded-full" style={{ width: '87%' }}></div>
+                        </div>
+                        
+                        <div className="text-center mt-4">
+                          <p className="text-sm text-purple-700">
+                            Recommendations updated: {new Date().toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

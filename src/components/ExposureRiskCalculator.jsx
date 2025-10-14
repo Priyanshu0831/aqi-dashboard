@@ -14,7 +14,22 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  Loader2
+  Loader2,
+  Download,
+  Share2,
+  RefreshCw,
+  Heart,
+  Brain,
+  Zap,
+  Sun,
+  Wind,
+  Droplets,
+  Thermometer,
+  BarChart3,
+  Info,
+  Lightbulb,
+  Calendar,
+  TrendingUp
 } from 'lucide-react';
 import './ExposureRiskCalculator.css';
 
@@ -31,6 +46,8 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [requestId, setRequestId] = useState('');
   const [maskedContact, setMaskedContact] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const [resultData, setResultData] = useState(null);
   
   const otpInputRefs = useRef([]);
   const contactFormRef = useRef(null);
@@ -330,7 +347,6 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
 
   const handleOTPVerify = async () => {
     const otp = otpValues.join('');
-    if (otp.length !== 6) return;
     
     setIsLoading(true);
     setOtpAttempts(prev => prev + 1);
@@ -346,7 +362,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
       // Store session token and result data
       sessionStorage.setItem('exposure_session_token', mockSessionToken);
       
-      // Store result data
+      // Store comprehensive result data
       const resultData = {
         resultId: mockResultId,
         user: {
@@ -360,44 +376,81 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
           pm25: 85,
           pm10: 120,
           no2: 42,
+          o3: 28,
+          co: 1.2,
+          so2: 15,
           temperature: 32,
           humidity: 62,
-          wind_kmh: 12
+          wind_kmh: 12,
+          uvIndex: 8,
+          pressure: 1013
         },
         riskScore: 78,
         riskCategory: 'High',
         primary_reason: 'PM2.5 concentration and duration of activity',
-        recommendations: [
-          'Avoid intensive outdoor exercise today',
-          'Use N95 mask if you must go outside',
-          'Keep windows closed during afternoon dust peaks'
+        healthEffects: {
+          immediate: [
+            'Eye irritation and watering',
+            'Coughing and throat irritation',
+            'Shortness of breath during physical activity',
+            'Headache and fatigue'
+          ],
+          longTerm: [
+            'Increased risk of respiratory infections',
+            'Potential lung function decline',
+            'Higher risk of cardiovascular issues',
+            'Exacerbation of existing respiratory conditions'
+          ]
+        },
+        recommendations: {
+          immediate: [
+            'Avoid intensive outdoor exercise today',
+            'Use N95 mask if you must go outside',
+            'Keep windows closed during afternoon dust peaks',
+            'Stay indoors during peak pollution hours (2-6 PM)'
+          ],
+          protective: [
+            'Wear N95 or KN95 mask for outdoor activities',
+            'Use air purifiers indoors',
+            'Keep windows closed and use AC',
+            'Avoid outdoor activities near busy roads'
+          ],
+          health: [
+            'Stay hydrated throughout the day',
+            'Consider postponing outdoor exercise',
+            'Monitor symptoms if you have respiratory conditions',
+            'Use saline nasal spray to reduce irritation'
+          ]
+        },
+        funFacts: [
+          'PM2.5 particles are 30 times smaller than a human hair!',
+          'Air pollution can travel up to 1000km from its source',
+          'Indoor air can be 2-5 times more polluted than outdoor air',
+          'Plants can reduce indoor air pollution by up to 87%'
+        ],
+        alternatives: [
+          'Try indoor yoga or home workouts instead',
+          'Visit air-conditioned malls or libraries',
+          'Schedule outdoor activities for early morning',
+          'Consider virtual social activities'
         ],
         confidence: 82,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
+        nextUpdate: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString() // 6 hours
       };
       
       sessionStorage.setItem('exposure_calc_result', JSON.stringify(resultData));
       
       trackEvent('otp_verify_success');
-      trackEvent('redirect_to_dashboard');
+      trackEvent('results_displayed_on_landing');
       
       console.log('Mock OTP verification successful. In a real app, this would call the API.');
       
-      // Show success message briefly then redirect directly to dashboard
-      setTimeout(() => {
-        // Use onDirectLogin if available, otherwise fall back to onRedirectToDashboard
-        if (onDirectLogin) {
-          onDirectLogin({
-            name: contactData.name,
-            email: contactData.email,
-            phone: contactData.phone,
-            fromExposureCalc: true,
-            resultId: mockResultId
-          });
-        } else {
-          onRedirectToDashboard(mockResultId);
-        }
-      }, 1500);
+      // Show results on landing page instead of redirecting
+      setResultData(resultData);
+      setShowResults(true);
+      setShowOTPOverlay(false);
+      setShowContactOverlay(false);
       
     } catch (error) {
       console.error('OTP verification error:', error);
@@ -438,25 +491,13 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Stable input component to prevent focus loss
-  const StableInput = ({ value, onChange, placeholder, className, type = "text", maxLength }) => {
-    const [localValue, setLocalValue] = useState(value);
-    
-    useEffect(() => {
-      setLocalValue(value);
-    }, [value]);
-    
-    const handleChange = (e) => {
-      const newValue = e.target.value;
-      setLocalValue(newValue);
-      onChange(newValue);
-    };
-    
+  // Simple input components without local state to prevent focus loss
+  const SimpleInput = ({ value, onChange, placeholder, className, type = "text", maxLength }) => {
     return (
       <input
         type={type}
-        value={localValue}
-        onChange={handleChange}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={className}
         maxLength={maxLength}
@@ -464,23 +505,11 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
     );
   };
 
-  const StableTextarea = ({ value, onChange, placeholder, className, maxLength }) => {
-    const [localValue, setLocalValue] = useState(value);
-    
-    useEffect(() => {
-      setLocalValue(value);
-    }, [value]);
-    
-    const handleChange = (e) => {
-      const newValue = e.target.value;
-      setLocalValue(newValue);
-      onChange(newValue);
-    };
-    
+  const SimpleTextarea = ({ value, onChange, placeholder, className, maxLength }) => {
     return (
       <textarea
-        value={localValue}
-        onChange={handleChange}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={className}
         maxLength={maxLength}
@@ -516,7 +545,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
       
       {formData.activity === 'other' && (
         <div className="other-input">
-          <StableInput
+          <SimpleInput
             placeholder="Please specify your activity"
             value={formData.otherActivity || ''}
             onChange={(value) => {
@@ -623,7 +652,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
             <MapPin className="input-icon" />
             Location
           </label>
-          <StableInput
+          <SimpleInput
             placeholder="Enter city or area"
             value={formData.location}
             onChange={(value) => {
@@ -807,7 +836,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
         
         <div className="input-group">
           <label className="input-label">Any other concerns?</label>
-          <StableTextarea
+          <SimpleTextarea
             placeholder="Share any specific health concerns or questions (140 characters max)"
             value={formData.otherConcerns}
             onChange={(value) => {
@@ -849,25 +878,13 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
     </div>
   );
 
-  // Stable contact input component
-  const StableContactInput = ({ value, onChange, placeholder, className, type = "text" }) => {
-    const [localValue, setLocalValue] = useState(value);
-    
-    useEffect(() => {
-      setLocalValue(value);
-    }, [value]);
-    
-    const handleChange = (e) => {
-      const newValue = e.target.value;
-      setLocalValue(newValue);
-      onChange(newValue);
-    };
-    
+  // Simple contact input component
+  const SimpleContactInput = ({ value, onChange, placeholder, className, type = "text" }) => {
     return (
       <input
         type={type}
-        value={localValue}
-        onChange={handleChange}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={className}
       />
@@ -898,7 +915,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
           
           <div className="form-group">
             <label className="form-label">Name *</label>
-            <StableContactInput
+            <SimpleContactInput
               type="text"
               value={contactData.name}
               onChange={(value) => {
@@ -911,7 +928,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
           
           <div className="form-group">
             <label className="form-label">Phone</label>
-            <StableContactInput
+            <SimpleContactInput
               type="tel"
               value={contactData.phone}
               onChange={(value) => {
@@ -924,7 +941,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
           
           <div className="form-group">
             <label className="form-label">Email</label>
-            <StableContactInput
+            <SimpleContactInput
               type="email"
               value={contactData.email}
               onChange={(value) => {
@@ -978,15 +995,15 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
           </div>
           
           <div className="otp-inputs">
-            {otpValues.map((value, index) => (
+            {[0, 1, 2, 3, 4, 5].map((index) => (
               <input
-                key={index}
+                key={`otp-${index}`}
                 ref={el => otpInputRefs.current[index] = el}
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]"
                 maxLength="1"
-                value={value}
+                value={otpValues[index] || ''}
                 onChange={(e) => handleOTPChange(index, e.target.value)}
                 onKeyDown={(e) => handleOTPKeyDown(index, e)}
                 onPaste={handleOTPPaste}
@@ -1017,7 +1034,7 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
           <button
             className="verify-button"
             onClick={handleOTPVerify}
-            disabled={otpValues.join('').length !== 6 || isLoading}
+            disabled={isLoading}
           >
             {isLoading ? (
               <>
@@ -1033,6 +1050,348 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
     </div>
   );
 
+  // Helper functions for results display
+  const getRiskColor = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'low': return 'text-green-600 bg-green-100 border-green-200';
+      case 'moderate': return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+      case 'high': return 'text-red-600 bg-red-100 border-red-200';
+      default: return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+    }
+  };
+
+  const getRiskIcon = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'low': return <CheckCircle className="w-6 h-6" />;
+      case 'moderate': return <AlertTriangle className="w-6 h-6" />;
+      case 'high': return <AlertTriangle className="w-6 h-6" />;
+      default: return <AlertTriangle className="w-6 h-6" />;
+    }
+  };
+
+  const handleRecalculate = () => {
+    setShowResults(false);
+    setResultData(null);
+    setCurrentStep(1);
+    setFormData({
+      activity: '',
+      duration: 30,
+      location: selectedLocation || '',
+      timeOfDay: 'morning',
+      ageGroup: '',
+      respiratoryCondition: 'none',
+      maskUsage: 'none',
+      allergies: [],
+      skinType: 'normal',
+      otherConcerns: ''
+    });
+    setContactData({
+      name: '',
+      phone: '',
+      email: ''
+    });
+    sessionStorage.removeItem('exposure_calc_input');
+    sessionStorage.removeItem('exposure_calc_result');
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Air Quality Exposure Risk Assessment',
+        text: `My exposure risk is ${resultData.riskCategory} (${resultData.riskScore}/100). Check your risk at AQI Dashboard!`,
+        url: window.location.href
+      });
+    } else {
+      // Fallback to copying to clipboard
+      navigator.clipboard.writeText(`My exposure risk is ${resultData.riskCategory} (${resultData.riskScore}/100). Check your risk at AQI Dashboard! ${window.location.href}`);
+      alert('Results copied to clipboard!');
+    }
+  };
+
+  const DetailedResults = () => {
+    if (!resultData) return null;
+
+    return (
+      <div className="detailed-results">
+        <div className="results-header">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Exposure Risk Assessment</h2>
+              <p className="text-gray-600">Personalized analysis for {resultData.user.name}</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                Share
+              </button>
+              <button
+                onClick={handleRecalculate}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Recalculate
+              </button>
+            </div>
+          </div>
+
+          {/* Risk Summary */}
+          <div className={`risk-summary p-6 rounded-2xl border-2 mb-8 ${getRiskColor(resultData.riskCategory)}`}>
+            <div className="flex items-center gap-4 mb-4">
+              {getRiskIcon(resultData.riskCategory)}
+              <div>
+                <h3 className="text-2xl font-bold">{resultData.riskCategory} Risk</h3>
+                <p className="text-lg">Risk Score: {resultData.riskScore}/100</p>
+              </div>
+            </div>
+            <p className="text-lg font-medium">Primary concern: {resultData.primary_reason}</p>
+            <div className="mt-4 flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4" />
+              <span>Generated: {new Date(resultData.generatedAt).toLocaleString()}</span>
+              <span className="mx-2">•</span>
+              <span>Confidence: {resultData.confidence}%</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Environment Data */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Current Air Quality
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">AQI</p>
+                      <p className="text-lg font-bold">{resultData.environment.aqi}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">PM2.5</p>
+                      <p className="text-lg font-bold">{resultData.environment.pm25} μg/m³</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <Wind className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">PM10</p>
+                      <p className="text-lg font-bold">{resultData.environment.pm10} μg/m³</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">NO₂</p>
+                      <p className="text-lg font-bold">{resultData.environment.no2} μg/m³</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Weather Conditions */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Sun className="w-5 h-5" />
+                  Weather Conditions
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <Thermometer className="w-5 h-5 text-red-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Temperature</p>
+                      <p className="text-lg font-bold">{resultData.environment.temperature}°C</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Droplets className="w-5 h-5 text-blue-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Humidity</p>
+                      <p className="text-lg font-bold">{resultData.environment.humidity}%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Wind className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Wind Speed</p>
+                      <p className="text-lg font-bold">{resultData.environment.wind_kmh} km/h</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Sun className="w-5 h-5 text-yellow-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">UV Index</p>
+                      <p className="text-lg font-bold">{resultData.environment.uvIndex}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Health Effects */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Heart className="w-5 h-5" />
+                  Potential Health Effects
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-red-700 mb-2">Immediate Effects</h4>
+                    <ul className="space-y-1">
+                      {resultData.healthEffects.immediate.map((effect, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span>{effect}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-orange-700 mb-2">Long-term Risks</h4>
+                    <ul className="space-y-1">
+                      {resultData.healthEffects.longTerm.map((effect, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                          <span>{effect}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Recommendations */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  Recommendations
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-red-700 mb-2">Immediate Actions</h4>
+                    <ul className="space-y-2">
+                      {resultData.recommendations.immediate.map((rec, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-blue-700 mb-2">Protective Measures</h4>
+                    <ul className="space-y-2">
+                      {resultData.recommendations.protective.map((rec, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <Shield className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-green-700 mb-2">Health Tips</h4>
+                    <ul className="space-y-2">
+                      {resultData.recommendations.health.map((rec, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <Heart className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alternative Activities */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Lightbulb className="w-5 h-5" />
+                  Alternative Activities
+                </h3>
+                <ul className="space-y-2">
+                  {resultData.alternatives.map((alt, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <Lightbulb className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                      <span>{alt}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Fun Facts */}
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Brain className="w-5 h-5" />
+                  Did You Know?
+                </h3>
+                <ul className="space-y-3">
+                  {resultData.funFacts.map((fact, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <Info className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{fact}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Your Inputs Summary */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Your Activity Details
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Activity:</span>
+                    <span className="font-medium">{resultData.inputs.activity.replace('_', ' ')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Duration:</span>
+                    <span className="font-medium">{resultData.inputs.duration} minutes</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Location:</span>
+                    <span className="font-medium">{resultData.inputs.location}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Time:</span>
+                    <span className="font-medium">{resultData.inputs.timeOfDay}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Age Group:</span>
+                    <span className="font-medium">{resultData.inputs.ageGroup.replace('_', '-')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Mask Usage:</span>
+                    <span className="font-medium">{resultData.inputs.maskUsage}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1: return <Step1 />;
@@ -1046,48 +1405,54 @@ const ExposureRiskCalculator = ({ onRedirectToDashboard, onDirectLogin, selected
 
   return (
     <div className={`exposure-calculator ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Progress Bar */}
-      <div className="progress-container">
-        <div className="progress-bar">
-          <div 
-            className="progress-fill" 
-            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-          />
-        </div>
-        <div className="progress-text">
-          Step {currentStep} of {totalSteps}
-        </div>
-      </div>
-
-      {/* Calculator Card */}
-      <div className="calculator-card">
-        {/* Step Navigation */}
-        <div className="step-navigation">
-          <div className="step-indicators">
-            {Array.from({ length: totalSteps }, (_, i) => i + 1).map(step => (
-              <button
-                key={step}
-                className={`step-indicator ${currentStep === step ? 'active' : ''} ${step < currentStep ? 'completed' : ''}`}
-                onClick={() => goToStep(step)}
-                aria-label={`Go to step ${step}`}
-              >
-                {step < currentStep ? <CheckCircle /> : step}
-              </button>
-            ))}
+      {showResults ? (
+        <DetailedResults />
+      ) : (
+        <>
+          {/* Progress Bar */}
+          <div className="progress-container">
+            <div className="progress-bar">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+              />
+            </div>
+            <div className="progress-text">
+              Step {currentStep} of {totalSteps}
+            </div>
           </div>
-        </div>
 
-        {/* Step Content */}
-        <div className="step-container">
-          {renderStep()}
-        </div>
-      </div>
+          {/* Calculator Card */}
+          <div className="calculator-card">
+            {/* Step Navigation */}
+            <div className="step-navigation">
+              <div className="step-indicators">
+                {Array.from({ length: totalSteps }, (_, i) => i + 1).map(step => (
+                  <button
+                    key={step}
+                    className={`step-indicator ${currentStep === step ? 'active' : ''} ${step < currentStep ? 'completed' : ''}`}
+                    onClick={() => goToStep(step)}
+                    aria-label={`Go to step ${step}`}
+                  >
+                    {step < currentStep ? <CheckCircle /> : step}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      {/* Contact Overlay */}
-      {showContactOverlay && <ContactOverlay />}
-      
-      {/* OTP Overlay */}
-      {showOTPOverlay && <OTPOverlay />}
+            {/* Step Content */}
+            <div className="step-container">
+              {renderStep()}
+            </div>
+          </div>
+
+          {/* Contact Overlay */}
+          {showContactOverlay && <ContactOverlay />}
+          
+          {/* OTP Overlay */}
+          {showOTPOverlay && <OTPOverlay />}
+        </>
+      )}
     </div>
   );
 };
